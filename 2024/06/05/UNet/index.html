@@ -1,0 +1,226 @@
+<!DOCTYPE html><html lang="en" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>UNet | AI for Science</title><meta name="author" content="Tango"><meta name="copyright" content="Tango"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="UNet做分类工作如何选取损失函数  元交叉熵损失（Binary Cross-Entropy Loss）   这是二分类问题中最常用的损失函数之一。 它衡量的是模型预测概率分布和真实标签之间的差异。 对于UNet模型，当输出层使用sigmoid激活函数时，二元交叉熵损失是一个很好的选择，因为它可以输出介于0和1之间的概率值。 使用二元交叉熵损失时，模型会尝试最小化预测概率和实际标签之间的差异。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="UNet">
+<meta property="og:url" content="http://zhangwenxiang.com/2024/06/05/UNet/index.html">
+<meta property="og:site_name" content="AI for Science">
+<meta property="og:description" content="UNet做分类工作如何选取损失函数  元交叉熵损失（Binary Cross-Entropy Loss）   这是二分类问题中最常用的损失函数之一。 它衡量的是模型预测概率分布和真实标签之间的差异。 对于UNet模型，当输出层使用sigmoid激活函数时，二元交叉熵损失是一个很好的选择，因为它可以输出介于0和1之间的概率值。 使用二元交叉熵损失时，模型会尝试最小化预测概率和实际标签之间的差异。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://zhangwenxiang.com/img/avatar.jpg">
+<meta property="article:published_time" content="2024-06-05T02:52:04.000Z">
+<meta property="article:modified_time" content="2024-06-05T02:53:50.106Z">
+<meta property="article:author" content="Tango">
+<meta property="article:tag" content="ai, cv, science, phd, study">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://zhangwenxiang.com/img/avatar.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://zhangwenxiang.com/2024/06/05/UNet/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: 'Copy successfully',
+    error: 'Copy error',
+    noSupport: 'The browser does not support'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: 'Just',
+    min: 'minutes ago',
+    hour: 'hours ago',
+    day: 'days ago',
+    month: 'months ago'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'UNet',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: false,
+  postUpdate: '2024-06-05 10:53:50'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+    win.getCSS = (url,id = false) => new Promise((resolve, reject) => {
+      const link = document.createElement('link')
+      link.rel = 'stylesheet'
+      link.href = url
+      if (id) link.id = id
+      link.onerror = reject
+      link.onload = link.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        link.onload = link.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(link)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/avatar.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">37</div></a><a href="/tags/"><div class="headline">Tags</div><div class="length-num">35</div></a><a href="/categories/"><div class="headline">Categories</div><div class="length-num">14</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: linear-gradient(20deg, #0062be, #925696, #cc426e, #fb0347)"><nav id="nav"><span id="blog-info"><a href="/" title="AI for Science"><span class="site-name">AI for Science</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">UNet</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">Created</span><time class="post-meta-date-created" datetime="2024-06-05T02:52:04.000Z" title="Created 2024-06-05 10:52:04">2024-06-05</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">Updated</span><time class="post-meta-date-updated" datetime="2024-06-05T02:53:50.106Z" title="Updated 2024-06-05 10:53:50">2024-06-05</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="UNet"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">Post View:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p>UNet做分类工作如何选取损失函数</p>
+<ol>
+<li>元交叉熵损失（Binary Cross-Entropy Loss）</li>
+</ol>
+<ul>
+<li>这是二分类问题中最常用的损失函数之一。</li>
+<li>它衡量的是模型预测概率分布和真实标签之间的差异。</li>
+<li>对于UNet模型，当输出层使用sigmoid激活函数时，二元交叉熵损失是一个很好的选择，因为它可以输出介于0和1之间的概率值。</li>
+<li>使用二元交叉熵损失时，模型会尝试最小化预测概率和实际标签之间的差异。</li>
+</ul>
+<ol start="2">
+<li>加权二元交叉熵损失：</li>
+</ol>
+<ul>
+<li>当前景（例如病灶区域）和背景（正常区域）样本数量极不平衡时，为了更重视难分类的少数类样本，可以在计算交叉熵损失时给前景或背景赋予不同的权重，以调整模型对两类像素的学习强度。</li>
+</ul>
+<ol start="3">
+<li>均方误差损失（Mean Squared Error Loss）</li>
+</ol>
+<ul>
+<li>虽然均方误差通常用于回归问题，但在某些情况下也可以用于二分类问题。</li>
+<li>当输出层没有使用sigmoid激活函数，而是直接输出两个类别的预测值时，可以使用均方误差损失。</li>
+<li>该损失函数计算预测值与真实标签之间的平方差的平均值。</li>
+</ul>
+<ol start="4">
+<li>Focal Loss</li>
+</ol>
+<ul>
+<li>Focal Loss是为了解决类别不平衡问题而设计的，特别是在医学图像分割等任务中非常有效。</li>
+<li>它通过减少对易分类样本的关注，增加对难分类样本的关注，从而提高模型对感兴趣区域的识别能力。</li>
+<li>在UNet模型中，Focal Loss可以帮助模型更好地关注那些难以分割的区域。</li>
+</ul>
+<ol start="5">
+<li>Dice Loss</li>
+</ol>
+<ul>
+<li>Dice Loss结合了Focal Loss和Dice系数，后者是一种衡量两个样本相似度的指标。</li>
+<li>这种损失函数特别适用于医学图像分割，因为它可以更好地处理像素级别的预测。</li>
+<li>在二分类任务中，Dice Loss可以帮助模型更精确地定位目标区域。</li>
+</ul>
+<ol start="6">
+<li>Categorical Cross-Entropy Loss</li>
+</ol>
+<ul>
+<li>用于多分类问题，尤其是在输出层使用softmax激活函数时。</li>
+<li>它衡量的是模型预测的概率分布与真实分布之间的差异。</li>
+</ul>
+<ol start="7">
+<li>Hinge Loss</li>
+</ol>
+<ul>
+<li>用于支持向量机(SVM)的损失函数，也可用于二分类问题。</li>
+<li>它鼓励模型将正类和负类尽可能远地分开。</li>
+<li>对于UNet模型，当使用softmax输出层进行多分类时，Hinge Loss可以用于分类任务。</li>
+</ul>
+<ol start="8">
+<li>Sigmoid Cross-Entropy Loss</li>
+</ol>
+<ul>
+<li>类似于二元交叉熵，但是用于多分类问题，当输出层使用sigmoid激活函数时。</li>
+</ul>
+</article><div class="tag_share"><div class="post-meta__tag-list"></div><div class="post_share"><div class="social-share" data-image="/img/avatar.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2024/06/04/Feature-Representation-Embedding/" title="Feature/Representation/Embedding"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">Next Post</div><div class="next_info">Feature/Representation/Embedding</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Tango</div><div class="author-info__description">my ai learning experience</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">37</div></a><a href="/tags/"><div class="headline">Tags</div><div class="length-num">35</div></a><a href="/categories/"><div class="headline">Categories</div><div class="length-num">14</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/tango"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/tango" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="mailto:tango@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>Announcement</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>Recent Post</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/06/05/UNet/" title="UNet">UNet</a><time datetime="2024-06-05T02:52:04.000Z" title="Created 2024-06-05 10:52:04">2024-06-05</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/06/04/Feature-Representation-Embedding/" title="Feature/Representation/Embedding">Feature/Representation/Embedding</a><time datetime="2024-06-04T08:50:08.000Z" title="Created 2024-06-04 16:50:08">2024-06-04</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/05/09/%E5%A6%99%E8%AF%8D/" title="妙词">妙词</a><time datetime="2024-05-09T03:16:43.000Z" title="Created 2024-05-09 11:16:43">2024-05-09</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/04/16/FNN%E5%89%8D%E9%A6%88%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/" title="FNN前馈神经网络">FNN前馈神经网络</a><time datetime="2024-04-16T08:55:04.000Z" title="Created 2024-04-16 16:55:04">2024-04-16</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/04/14/%E6%97%A0%E5%81%8F/" title="Unbiased 无偏">Unbiased 无偏</a><time datetime="2024-04-14T13:14:31.000Z" title="Created 2024-04-14 21:14:31">2024-04-14</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2023 - 2024 By Tango</div><div class="framework-info"><span>Framework </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>Theme </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="Read Mode"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="Switch Between Light And Dark Mode"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="Toggle between single-column and double-column"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="Setting"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="Back To Top"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
